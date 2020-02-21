@@ -1,0 +1,3 @@
+[submodule "markdown-dashboard"]
+	path = markdown-dashboard
+	url = git@github.com:mmai/markdown-dashboard.git
