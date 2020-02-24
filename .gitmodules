@@ -1,0 +1,3 @@
+[submodule "markdownizer"]
+	path = markdownizer
+	url = git@github.com:mmai/markdownizer.git
