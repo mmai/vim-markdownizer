@@ -1,4 +1,4 @@
-enum Messages {
+pub enum Messages {
     ProjectList,
     Unknown(String),
 }
