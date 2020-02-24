@@ -45,6 +45,9 @@ Visualize:
 * [ ] Dashboard
   * [ ] Quadrant
   * [ ] listing projets, completion date
+  * [ ] waiting for (toread)
+    * books
+    * links
 * [ ] stratégie merge écrits sur cahier ?
 * [roam features](https://www.nateliason.com/blog/roam) :
     * création liens de retour (related to, subtopic of...)
