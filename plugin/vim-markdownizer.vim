@@ -1,13 +1,19 @@
 let s:plugindir = expand('<sfile>:p:h:h')
-let s:bin = s:plugindir.'/target/debug/markdownizer'
+let s:bin = s:plugindir.'/target/release/vim-markdownizer'
 
-let s:projectsdir = '~/think/todo/projets/'
+let s:projectsdir = '/home/henri/think/todo/projets/'
 
+" Constants for RPC messages.
+let s:ProjectList = 'project_list'
 
 " Initialize the channel
 if !exists('s:markdownizerJobId')
 	let s:markdownizerJobId = 0
 endif
+
+function! s:project_list()
+  call rpcnotify(s:markdownizerJobId, s:ProjectList)
+endfunction
 
 " Entry point. Initialize RPC. If it succeeds, then attach commands to the `rpcnotify` invocations.
 function! s:connect()
@@ -23,11 +29,9 @@ function! s:connect()
   endif
 endfunction
 
-" Initialize RPC : XXX should not be in ftplugin (started each time ?? --> d'où
-" l'intérêt de )
 function! s:initRpc()
   if s:markdownizerJobId == 0
-    let jobid = jobstart([s:bin, '-d', s:projectsdir, '-r', s:projectsdir ], { 'rpc': v:true })
+    let jobid = jobstart([s:bin, s:projectsdir ], { 'rpc': v:true })
     return jobid
   else
     return s:markdownizerJobId
@@ -36,24 +40,7 @@ endfunction
 
 function! s:configureCommands()
   command! MarkdownizerProjectList :call s:project_list()
-  " command! -nargs=+ Multiply :call s:multiply(<f-args>)
 endfunction
-
-" Constants for RPC messages.
-let s:ProjectList = 'project_list'
-" let s:Multiply = 'multiply'
-
-function! s:project_list()
-    " echo "id: ".s:markdownizerJobId
-  call rpcnotify(s:markdownizerJobId, s:ProjectList)
-endfunction
-
-" function! s:multiply(...)
-"   let s:p = get(a:, 1, 1)
-"   let s:q = get(a:, 2, 1)
-"
-"   call rpcnotify(s:calculatorJobId, s:Multiply, str2nr(s:p), str2nr(s:q))
-" endfunction
 
 call s:connect()
 
