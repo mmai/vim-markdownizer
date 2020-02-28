@@ -23,15 +23,6 @@ Commandes :
 
 ## How
 
-Filetype
-  ftdetect -> custom type which inherit functions from markdown (possible for all plugins )?
-
- https://stackoverflow.com/questions/23497257/use-common-code-for-filetype-plugin
-
-Parse & manage:
-  https://github.com/azundo/VikiGTD (vimviki + python)
-  https://github.com/chiphogg/vim-vtd/ (python)
-
 Visualize:
   https://github.com/iamcco/markdown-preview.nvim (synchronized browser)
 
@@ -53,6 +44,11 @@ Visualize:
     * création liens de retour (related to, subtopic of...)
     * tags as pages ?
     * show 'unlinked' pages : pages containing term but not linked
+* joplin features
+    * terminal interface wich can launch default editor
+* sqlite as a cache database
+    * look for files changed with the git revision
+    * comment gérer les fichiers supprimés ?
 * server with:
     * API : update pages (ie new libraything entry,...)
     * page view (for mobile...), browsing...

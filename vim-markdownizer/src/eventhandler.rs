@@ -29,53 +29,26 @@ impl EventHandler {
                             let plist_str = plist.into_iter().map(|project| {
                                 format!("{} ({})", project.title, project.tasks.len())
                             }).collect();
-
-                            let buf = self.nvim.get_current_buf().unwrap();
-                            let buf_len = buf.line_count(&mut self.nvim).unwrap();
-                            buf.set_lines(&mut self.nvim, 0, buf_len, true, plist_str).unwrap();
+                            self.nvim.put(plist_str, "", true, true).unwrap();
+                            // self.obsolete_put(plist_str);
                         },
                         Err(e) => {
                             self.nvim.err_writeln(&format!("Error when reading projects : {}", e)).unwrap();
                         }
-
                     }
-
-                    // let plist_str = plist.into_iter().map(|entry| {
-                    //     match entry {
-                    //         project => format!("{} ({})", project.title, project.tasks.len()),
-                    //         e => format!("Not a project: {:?} ", e)
-                    //     }
-                    // }).collect();
-                    //
-                    // let buf = self.nvim.get_current_buf().unwrap();
-                    // let buf_len = buf.line_count(&mut self.nvim).unwrap();
-                    // buf.set_lines(&mut self.nvim, 0, buf_len, true, plist_str)
-                    //     .unwrap();
-                    // self.nvim.command("setlocal nomodifiable").unwrap();
-
-
-
-
-
-                    // for entry in plist {
-                    //     match entry {
-                    //         project => {
-                    //             self.nvim // <-- Echo response to Nvim
-                    //                 .command(&format!("echom \"Project: {} ({})\"", project.title, project.tasks.len()))
-                    //                 .unwrap();
-                    //         },
-                    //         e => {
-                    //             self.nvim // <-- Echo response to Nvim
-                    //                 .command(&format!("echo \"Not a project: {:?} \"", e))
-                    //                 .unwrap();
-                    //         }
-                    //     }
-                    // }
                 }
                 Messages::Unknown(uevent) => {
                     // unknown event
                 }
             }
         }
+    }
+
+    fn obsolete_put(&mut self, plist_str: Vec<String>) {
+        // Before put was available :
+        let win = self.nvim.get_current_win().unwrap();
+        let (row, _col) = win.get_cursor(&mut self.nvim).unwrap();
+        let buf = self.nvim.get_current_buf().unwrap();
+        buf.set_lines(&mut self.nvim, row, row, true, plist_str).unwrap();
     }
 }
