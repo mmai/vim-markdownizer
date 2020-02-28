@@ -23,20 +23,35 @@ impl EventHandler {
         for (event, values) in receiver {
             match Messages::from(event) {
                 Messages::ProjectList => {
-                    let plist = self.markdownizer.project_list().unwrap();
+                    let result = self.markdownizer.project_list();
+                    match result {
+                        Ok(plist) => {
+                            let plist_str = plist.into_iter().map(|project| {
+                                format!("{} ({})", project.title, project.tasks.len())
+                            }).collect();
 
-                    let plist_str = plist.into_iter().map(|entry| {
-                        match entry {
-                            project => format!("{} ({})", project.title, project.tasks.len()),
-                            e => format!("Not a project: {:?} ", e)
+                            let buf = self.nvim.get_current_buf().unwrap();
+                            let buf_len = buf.line_count(&mut self.nvim).unwrap();
+                            buf.set_lines(&mut self.nvim, 0, buf_len, true, plist_str).unwrap();
+                        },
+                        Err(e) => {
+                            self.nvim.err_writeln(&format!("Error when reading projects : {}", e)).unwrap();
                         }
-                    }).collect();
 
-                    let buf = self.nvim.get_current_buf().unwrap();
-                    let buf_len = buf.line_count(&mut self.nvim).unwrap();
-                    buf.set_lines(&mut self.nvim, 0, buf_len, true, plist_str)
-                        .unwrap();
-                    self.nvim.command("setlocal nomodifiable").unwrap();
+                    }
+
+                    // let plist_str = plist.into_iter().map(|entry| {
+                    //     match entry {
+                    //         project => format!("{} ({})", project.title, project.tasks.len()),
+                    //         e => format!("Not a project: {:?} ", e)
+                    //     }
+                    // }).collect();
+                    //
+                    // let buf = self.nvim.get_current_buf().unwrap();
+                    // let buf_len = buf.line_count(&mut self.nvim).unwrap();
+                    // buf.set_lines(&mut self.nvim, 0, buf_len, true, plist_str)
+                    //     .unwrap();
+                    // self.nvim.command("setlocal nomodifiable").unwrap();
 
 
 
