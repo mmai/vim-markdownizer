@@ -9,8 +9,9 @@ name = "vim-markdownizer"
 path = "src/main.rs"
 
 [dependencies]
-# neovim-lib = "0.6.1" # version inconsistent the git one..
+# neovim-lib = "0.6.1" # version inconsistent to the git one..
 neovim-lib = { git = "https://github.com/daa84/neovim-lib" }
+pathdiff = "0.1.0"
 
 [dependencies.markdownizer]
 path = "../markdownizer"

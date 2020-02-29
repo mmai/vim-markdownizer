@@ -1,6 +1,8 @@
 use neovim_lib::{Neovim, NeovimApi, Session};
+use pathdiff::diff_paths;
 use markdownizer::Markdownizer;
 use crate::messages::Messages;
+use std::path::PathBuf;
 
 pub struct EventHandler {
     nvim: Neovim,
@@ -23,11 +25,18 @@ impl EventHandler {
         for (event, values) in receiver {
             match Messages::from(event) {
                 Messages::ProjectList => {
+                    // let curr_dir: PathBuf = self.nvim.command_output("echo expand('%:p:h')").unwrap().into();
+                    let curr_dir: PathBuf = self.nvim.call_function("expand", vec!("%:p:h".into()))
+                        .map(|val| String::from( val.as_str().unwrap() ))
+                        .unwrap().into();
                     let result = self.markdownizer.project_list();
                     match result {
                         Ok(plist) => {
-                            let plist_str = plist.into_iter().map(|project| {
-                                format!("{} ({})", project.title, project.tasks.len())
+                            let plist_str = plist.into_iter().map(|stored_project| {
+                                let project = &stored_project.entity;
+                                let location = &stored_project.location;
+                                let relative_path = diff_paths(location, &curr_dir).unwrap();
+                                format!("[{}]({}) ({})", project.title, relative_path.to_str().unwrap(), project.tasks.len())
                             }).collect();
                             self.nvim.put(plist_str, "", true, true).unwrap();
                             // self.obsolete_put(plist_str);
