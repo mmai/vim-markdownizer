@@ -5,15 +5,23 @@ let s:projectsdir = '/home/henri/think/todo/projets/'
 
 " Constants for RPC messages.
 let s:ProjectList = 'project_list'
+let s:Dashboard = 'dashboard'
 
 " Initialize the channel
 if !exists('s:markdownizerJobId')
 	let s:markdownizerJobId = 0
 endif
 
+" Commands
+function! s:dashboard()
+  call rpcnotify(s:markdownizerJobId, s:Dashboard)
+endfunction
+
 function! s:project_list()
   call rpcnotify(s:markdownizerJobId, s:ProjectList)
 endfunction
+
+
 
 " Entry point. Initialize RPC. If it succeeds, then attach commands to the `rpcnotify` invocations.
 function! s:connect()
@@ -40,6 +48,7 @@ endfunction
 
 function! s:configureCommands()
   command! MarkdownizerProjectList :call s:project_list()
+  command! MarkdownizerDashboard :call s:dashboard()
 endfunction
 
 call s:connect()
@@ -125,3 +134,24 @@ nnoremap <buffer> <script> <Plug>DashboardInitProject :DashboardInitProject<CR>
 if !hasmapto('<Plug>DashboardInitProject')
   nmap <buffer> <silent> <Leader>db <Plug>DashboardInitProject
 endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

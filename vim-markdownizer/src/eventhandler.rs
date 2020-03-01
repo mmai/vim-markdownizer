@@ -24,11 +24,17 @@ impl EventHandler {
 
         for (event, values) in receiver {
             match Messages::from(event) {
+                Messages::Dashboard => {
+                    //Open dashboard pane
+                    //  see https://github.com/rafi/vim-sidemenu/blob/master/autoload/sidemenu.vim
+                    //Show dashboard content
+                    //  - markdownizer.construct_data
+                    //  - vim buffer display data
+                },
                 Messages::ProjectList => {
                     // let curr_dir: PathBuf = self.nvim.command_output("echo expand('%:p:h')").unwrap().into();
-                    let curr_dir: PathBuf = self.nvim.call_function("expand", vec!("%:p:h".into()))
-                        .map(|val| String::from( val.as_str().unwrap() ))
-                        .unwrap().into();
+                    // let curr_dir: PathBuf = self.vim_ask("expand", vec!("%:p:h")).unwrap().into();
+                    let curr_dir: PathBuf = self.vim_ask("expand('%:p:h')").unwrap().into();
                     let result = self.markdownizer.project_list();
                     match result {
                         Ok(plist) => {
@@ -51,6 +57,14 @@ impl EventHandler {
                 }
             }
         }
+    }
+
+    // Call a vim function which return output
+    // fn vim_ask(&mut self, func: &str, params: Vec<&str>) -> Result<String, neovim_lib::neovim::CallError> {
+        // self.nvim.call_function(func, params.into_iter().map(|v| v.into()).collect())
+    fn vim_ask(&mut self, expr: &str) -> Result<String, neovim_lib::neovim::CallError> {
+        self.nvim.eval(expr)
+            .map(|val| String::from( val.as_str().unwrap() ))
     }
 
     fn obsolete_put(&mut self, plist_str: Vec<String>) {
