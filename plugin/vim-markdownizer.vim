@@ -14,7 +14,8 @@ endif
 
 " Commands
 function! s:dashboard()
-  call rpcnotify(s:markdownizerJobId, s:Dashboard)
+  let s:buf_dashboard = MarkdownizerOpen()
+  call rpcnotify(s:markdownizerJobId, s:Dashboard, s:buf_dashboard)
 endfunction
 
 function! s:project_list()
@@ -134,24 +135,3 @@ nnoremap <buffer> <script> <Plug>DashboardInitProject :DashboardInitProject<CR>
 if !hasmapto('<Plug>DashboardInitProject')
   nmap <buffer> <silent> <Leader>db <Plug>DashboardInitProject
 endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

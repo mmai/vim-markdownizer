@@ -25,7 +25,10 @@ impl EventHandler {
         for (event, values) in receiver {
             match Messages::from(event) {
                 Messages::Dashboard => {
-                    //Open dashboard pane
+                   // let buf = values.pop().unwrap().into();
+                   let buf = self.nvim.get_current_buf().unwrap();
+                   buf.set_lines(&mut self.nvim, 0, -1, true, vec!("in".into(), "dashboard".into())).unwrap();
+                   //Open dashboard pane
                     //  see https://github.com/rafi/vim-sidemenu/blob/master/autoload/sidemenu.vim
                     //Show dashboard content
                     //  - markdownizer.construct_data
@@ -58,6 +61,18 @@ impl EventHandler {
             }
         }
     }
+
+    // fn get_project_list(&mut self) -> Result<Vec<String>, markdownizer::MarkdownizerError> {
+    //     let curr_dir: PathBuf = self.vim_ask("expand('%:p:h')").unwrap().into();
+    //     let result = self.markdownizer.project_list();
+    //     result.and_then(|plist| 
+    //             plist.into_iter().map(|stored_project| {
+    //                 let project = &stored_project.entity;
+    //                 let location = &stored_project.location;
+    //                 let relative_path = diff_paths(location, &curr_dir).unwrap();
+    //                 format!("[{}]({}) ({})", project.title, relative_path.to_str().unwrap(), project.tasks.len())
+    //             }).collect())
+    // }
 
     // Call a vim function which return output
     // fn vim_ask(&mut self, func: &str, params: Vec<&str>) -> Result<String, neovim_lib::neovim::CallError> {
