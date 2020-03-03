@@ -27,27 +27,21 @@ impl EventHandler {
                 Messages::Dashboard => {
                    // let buf = values.pop().unwrap().into();
                    let buf = self.nvim.get_current_buf().unwrap();
-                   buf.set_lines(&mut self.nvim, 0, -1, true, vec!("in".into(), "dashboard".into())).unwrap();
-                   //Open dashboard pane
-                    //  see https://github.com/rafi/vim-sidemenu/blob/master/autoload/sidemenu.vim
-                    //Show dashboard content
-                    //  - markdownizer.construct_data
-                    //  - vim buffer display data
+                   let result = self.get_project_list();
+                   match result {
+                     Ok(plist) => {
+                       buf.set_lines(&mut self.nvim, 0, -1, true, plist).unwrap();
+                     },
+                     Err(e) => {
+                       self.nvim.err_writeln(&format!("Error when reading projects : {}", e)).unwrap();
+                     }
+                   }
                 },
                 Messages::ProjectList => {
-                    // let curr_dir: PathBuf = self.nvim.command_output("echo expand('%:p:h')").unwrap().into();
-                    // let curr_dir: PathBuf = self.vim_ask("expand", vec!("%:p:h")).unwrap().into();
-                    let curr_dir: PathBuf = self.vim_ask("expand('%:p:h')").unwrap().into();
-                    let result = self.markdownizer.project_list();
+                    let result = self.get_project_list();
                     match result {
                         Ok(plist) => {
-                            let plist_str = plist.into_iter().map(|stored_project| {
-                                let project = &stored_project.entity;
-                                let location = &stored_project.location;
-                                let relative_path = diff_paths(location, &curr_dir).unwrap();
-                                format!("[{}]({}) ({})", project.title, relative_path.to_str().unwrap(), project.tasks.len())
-                            }).collect();
-                            self.nvim.put(plist_str, "", true, true).unwrap();
+                            self.nvim.put(plist, "", true, true).unwrap();
                             // self.obsolete_put(plist_str);
                         },
                         Err(e) => {
@@ -62,17 +56,21 @@ impl EventHandler {
         }
     }
 
-    // fn get_project_list(&mut self) -> Result<Vec<String>, markdownizer::MarkdownizerError> {
-    //     let curr_dir: PathBuf = self.vim_ask("expand('%:p:h')").unwrap().into();
-    //     let result = self.markdownizer.project_list();
-    //     result.and_then(|plist| 
-    //             plist.into_iter().map(|stored_project| {
-    //                 let project = &stored_project.entity;
-    //                 let location = &stored_project.location;
-    //                 let relative_path = diff_paths(location, &curr_dir).unwrap();
-    //                 format!("[{}]({}) ({})", project.title, relative_path.to_str().unwrap(), project.tasks.len())
-    //             }).collect())
-    // }
+    fn get_project_list(&mut self) -> Result<Vec<String>, markdownizer::MarkdownizerError> {
+        // let curr_dir: PathBuf = self.nvim.command_output("echo expand('%:p:h')").unwrap().into();
+        // let curr_dir: PathBuf = self.vim_ask("expand", vec!("%:p:h")).unwrap().into();
+        let curr_dir: PathBuf = self.vim_ask("expand('%:p:h')").unwrap().into();
+        let result = self.markdownizer.project_list();
+        result.and_then(|plist| {
+          let lines = plist.into_iter().map(|stored_project| {
+            let project = &stored_project.entity;
+            let location = &stored_project.location;
+            let relative_path = diff_paths(location, &curr_dir).unwrap();
+            String::from(format!("[{}]({}) ({})", project.title, relative_path.to_str().unwrap(), project.tasks.len()))
+          }).collect();
+          Ok(lines)
+        })
+    }
 
     // Call a vim function which return output
     // fn vim_ask(&mut self, func: &str, params: Vec<&str>) -> Result<String, neovim_lib::neovim::CallError> {
