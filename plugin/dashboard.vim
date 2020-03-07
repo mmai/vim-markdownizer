@@ -26,6 +26,9 @@ endfunction
 
 " Opens dashboard window
 function! s:open()
+    " get content buffer (current buffer before opening dashboard)
+	let s:win_content = winnr()
+
 	let s:winrestcmd = winrestcmd()
 	execute get(g:, 'dashboard_window', s:default_window)
 	let s:buf_dashboard = bufnr('')
@@ -50,7 +53,7 @@ endfunction
 
 function! MarkdownizerOpen()
     call s:open()
-    return s:buf_dashboard
+    return { "dashboard": s:buf_dashboard, "content": s:win_content }
 endfunction
 
 " command! MarkdownizerOpen :call s:open()

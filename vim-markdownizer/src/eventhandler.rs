@@ -22,7 +22,7 @@ impl EventHandler {
     pub fn recv(&mut self) {
         let receiver = self.nvim.session.start_event_loop_channel();
 
-        for (event, values) in receiver {
+        for (event, mut values) in receiver {
             match Messages::from(event) {
                 Messages::Dashboard => {
                    // let buf = values.pop().unwrap().into();
@@ -48,6 +48,24 @@ impl EventHandler {
                             self.nvim.err_writeln(&format!("Error when reading projects : {}", e)).unwrap();
                         }
                     }
+                }
+                Messages::ProjectSelect => {
+                   let line = values.pop().unwrap().as_i64().unwrap();
+                   let win_content = values.pop().unwrap().as_i64().unwrap();
+
+                   let buf = self.nvim.get_current_buf().unwrap();
+                   let project_str = buf.get_lines(&mut self.nvim, line, line + 1, true).unwrap();
+                   self.nvim.err_writeln(&format!("{:?}", project_str)).unwrap();
+                    // let result = self.get_project_file();
+                    // match result {
+                    //     Ok(file) => {
+                    //         self.nvim.put(plist, "", true, true).unwrap();
+                    //         // self.obsolete_put(plist_str);
+                    //     },
+                    //     Err(e) => {
+                    //         self.nvim.err_writeln(&format!("Error when reading projects : {}", e)).unwrap();
+                    //     }
+                    // }
                 }
                 Messages::Unknown(uevent) => {
                     // unknown event

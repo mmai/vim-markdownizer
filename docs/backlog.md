@@ -1,17 +1,27 @@
 # Backlog
 
+## Plugin vim -----------
+
+### Sidebar UI
+
+* click on projects open in main buffer
+    - id (line number ?)
+* colorize by quadrant
+
+### Clean code
+* async calls
+
+## Format -------------
+
+## Library -------------
+
 * [ ] detect missing project infos :
     * manque status
     * manque estimations
-* order by status / importance
-* colorize by quadrant
-* [ ] Dashboard
-  * [ ] Quadrant
-  * [ ] listing projets, completion date
-  * [ ] waiting for (toread)
+* [ ] listing projets, completion date
+* [ ] waiting for (toread)
     * books
     * links
-* [ ] stratégie merge écrits sur cahier ?
 * [roam features](https://www.nateliason.com/blog/roam) :
     * création liens de retour (related to, subtopic of...)
     * tags as pages ?
@@ -21,9 +31,23 @@
 * sqlite as a cache database
     * look for files changed with the git revision
     * comment gérer les fichiers supprimés ?
-* server with:
-    * API : update pages (ie new libraything entry,...)
-    * page view (for mobile...), browsing...
+
+## Server
+
+- https forcé
+- serve markdown (?)
+- API : update pages (ie new libraything entry,...)
+
+## Appli mobile
+
+- kotlin
+
+## Vrac
+
+* order by status / importance
+* [ ] Dashboard
+  * [ ] Quadrant
+* [ ] stratégie merge écrits sur cahier ?
 
 * mode d'emploi / article
 
