@@ -17,20 +17,18 @@ endif
 function! s:dashboard()
   let refs = MarkdownizerOpen()
   let s:buf_dashboard = refs["dashboard"]
-  let s:win_content = refs["content"]
+  let s:content_win = refs["content"]
   " Display projects
   call rpcnotify(s:markdownizerJobId, s:Dashboard, s:buf_dashboard)
 
-  " Capture events XXX ne pas passer par un mapping sur une commande
-  nnoremap <script> <silent> <buffer> <CR> :MarkdownizerProjectSelect<cr>
+  nnoremap <script> <silent> <buffer> <CR> :call ProjectSelect()<cr>
 endfunction
 
-function! s:project_select()
+function! ProjectSelect()
     let pos = getcurpos() " returns [bufnum,line,col,off,curswant]
     let line = pos[1]
-    call rpcnotify(s:markdownizerJobId, s:ProjectSelect, s:win_content, line)
+    call rpcnotify(s:markdownizerJobId, s:ProjectSelect, s:content_win, line)
 endfunction
-command! MarkdownizerProjectSelect :call s:project_select()
 
 function! s:project_list()
   call rpcnotify(s:markdownizerJobId, s:ProjectList)

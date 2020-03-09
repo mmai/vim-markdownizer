@@ -4,9 +4,14 @@
 
 ### Sidebar UI
 
-* click on projects open in main buffer
-    - id (line number ?)
-* colorize by quadrant
+- [.] click on projects open in main buffer
+- infos :
+    - missing estimation ?
+    - intensity (planned velocity)
+    - week tasks not planned according to intensity ?
+    - % velocity
+    - % completion date
+- colorize by quadrant
 
 ### Clean code
 * async calls

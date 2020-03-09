@@ -1,0 +1,8 @@
+session_name: markdownizer
+start_directory: ./
+windows:
+- window_name: dev window
+  layout: main-vertical
+  panes:
+    - nvim ./vim-markdownizer/src/eventhandler.rs
+    - ls
