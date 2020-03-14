@@ -1,4 +1,5 @@
-use neovim_lib::{Neovim, NeovimApi, Session};
+use neovim_lib::{Neovim, NeovimApi, Session, Value, Handler, RequestHandler};
+use neovim_lib::neovim_api::{Window};
 use pathdiff::diff_paths;
 use markdownizer::{types, Markdownizer};
 use crate::messages::Messages;
@@ -8,6 +9,7 @@ type StoredProject = types::Stored<types::Project>;
 
 pub struct State {
     loaded: bool,
+    content_win: Option<Window>,
     projects: Vec<StoredProject>
 }
 
@@ -17,11 +19,19 @@ pub struct EventHandler {
     markdownizer: Markdownizer,
 }
 
+struct MyHandler();
+impl Handler for MyHandler {}
+impl RequestHandler for MyHandler {
+    fn handle_request(&mut self, _name: &str, _args: Vec<Value>) -> Result<Value, Value> {
+        Ok(Value::from("ok"))
+    }
+}
+
 impl EventHandler {
     pub fn new(root: &str) -> EventHandler {
         let mut session = Session::new_parent().unwrap();
-        let nvim = Neovim::new(session);
-        let state = State { loaded: false, projects: vec!() };
+        let mut nvim = Neovim::new(session);
+        let state = State { loaded: false, content_win: None, projects: vec!() };
         let proot = std::path::PathBuf::from(root);
         let markdownizer = Markdownizer::new(&proot);
         EventHandler { nvim, state, markdownizer }
@@ -29,10 +39,21 @@ impl EventHandler {
 
     // Handle events
     pub fn recv(&mut self) {
-        let receiver = self.nvim.session.start_event_loop_channel();
+        let receiver = self.nvim.session.start_event_loop_channel_handler(MyHandler());
 
         for (event, mut values) in receiver {
             match Messages::from(event) {
+                Messages::InitContentWindow => {
+                    let content_win = self.nvim.get_current_win().unwrap();
+                    self.state.content_win = Some(content_win.clone());
+                    self.nvim.command(&format!("echom 'initwin value={:?}'", content_win)).unwrap();
+
+                    let wins = self.nvim.list_wins().unwrap();
+                    let _:() = wins.iter().map(|win| {
+                        self.nvim.command(&format!("echom 'some win value={:?}'", win)).unwrap();
+                        ()
+                    }).collect();
+                },
                 Messages::Dashboard => {
                    // let buf = values.pop().unwrap().into();
                    let buf = self.nvim.get_current_buf().unwrap();
@@ -56,7 +77,7 @@ impl EventHandler {
                 }
                 Messages::ProjectSelect => {
                    let line = values.pop().unwrap().as_i64().unwrap();
-                   let win_id = values.pop().unwrap().as_i64().unwrap();
+                   let win_id = values.pop().unwrap();
 
                    let curr_dir: PathBuf = self.vim_ask("expand('%:p:h')").unwrap().into();
                    let stored_project:&StoredProject = &self.state.projects[line as usize - 1];
@@ -66,15 +87,14 @@ impl EventHandler {
                    let relative_path = diff_paths(location.as_path(), &curr_dir).unwrap();
                    let file_path = String::from(format!("{}", relative_path.to_str().unwrap()));
 
-
-                   let target_win = self.get_window(win_id);
-                   self.nvim.set_current_win(&target_win).unwrap();
-                   self.nvim.command(&format!("echo '{}'", file_path)).unwrap();
+                   let cwin = self.state.content_win.clone().unwrap();
+                   self.nvim.set_current_win(&cwin).unwrap();
+                   // self.nvim.command(&format!("echo '{}'", file_path)).unwrap();
                    self.nvim.command(&format!("e {}", file_path)).unwrap();
                    // self.nvim.err_writeln(&format!("{}", file_path)).unwrap();
                 }
                 Messages::Unknown(uevent) => {
-                    // unknown event
+                   self.nvim.err_writeln(&format!("unkown event {:?}", uevent)).unwrap();
                 }
             }
         }
@@ -109,8 +129,22 @@ impl EventHandler {
             .map(|val| String::from( val.as_str().unwrap() ))
     }
 
-    fn get_window(&mut self, id: i64) -> neovim_lib::neovim_api::Window {
-        self.nvim.get_current_win().unwrap()
+    fn get_window(&mut self, id: Value) -> neovim_lib::neovim_api::Window {
+        // Window::new(id)
+        let curwin = self.nvim.get_current_win().unwrap();
+        let win_id = curwin.get_value();
+        self.nvim.command(&format!("echom 'curwin value={:?}'", win_id)).unwrap();
+
+
+
+        let wins = self.nvim.list_wins().unwrap();
+        let _:() = wins.iter().map(|win| {
+            self.nvim.command(&format!("echom 'some win value={:?}'", win)).unwrap();
+            ()
+        }).collect();
+
+
+        curwin
     }
 
     fn obsolete_put(&mut self, plist_str: Vec<String>) {

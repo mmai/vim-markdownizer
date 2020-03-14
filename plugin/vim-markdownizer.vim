@@ -4,6 +4,7 @@ let s:bin = s:plugindir.'/target/release/vim-markdownizer'
 let s:projectsdir = '/home/henri/think/todo/projets/'
 
 " Constants for RPC messages.
+let s:InitContentWindow = 'init_content_window'
 let s:ProjectList = 'project_list'
 let s:ProjectSelect = 'project_select'
 let s:Dashboard = 'dashboard'
@@ -15,12 +16,13 @@ endif
 
 " Commands
 function! s:dashboard()
+  call rpcrequest(s:markdownizerJobId, s:InitContentWindow)
   let refs = MarkdownizerOpen()
   let s:buf_dashboard = refs["dashboard"]
   let s:content_win = refs["content"]
   " Display projects
   call rpcnotify(s:markdownizerJobId, s:Dashboard, s:buf_dashboard)
-
+  
   nnoremap <script> <silent> <buffer> <CR> :call ProjectSelect()<cr>
 endfunction
 
@@ -33,7 +35,6 @@ endfunction
 function! s:project_list()
   call rpcnotify(s:markdownizerJobId, s:ProjectList)
 endfunction
-
 
 
 " Entry point. Initialize RPC. If it succeeds, then attach commands to the `rpcnotify` invocations.

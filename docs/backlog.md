@@ -1,5 +1,10 @@
 # Backlog
 
+## Next tasks
+
+- create window from id (look at vim-api internal methods)
+- rx rust ? tokio ? other libs (see webassembly...) ?
+
 ## Plugin vim -----------
 
 ### Sidebar UI
