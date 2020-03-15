@@ -1,23 +1,73 @@
-use neovim_lib::{Neovim, NeovimApi, Session, Value, Handler, RequestHandler};
-use neovim_lib::neovim_api::{Window};
+use async_trait::async_trait;
+use tokio::io::Stdout;
+use rmpv::Value;
+
 use pathdiff::diff_paths;
 use markdownizer::{types, Markdownizer};
-use crate::messages::Messages;
 use std::path::PathBuf;
+
+use nvim_rs::{
+  compat::tokio::Compat, Handler, Neovim,
+};
+
 
 type StoredProject = types::Stored<types::Project>;
 
+#[derive(Clone)]
 pub struct State {
     loaded: bool,
     content_win: Option<Window>,
     projects: Vec<StoredProject>
 }
 
-pub struct EventHandler {
-    nvim: Neovim,
+#[derive(Clone)]
+pub struct NeovimHandler{
     state: State,
     markdownizer: Markdownizer,
 }
+
+#[async_trait]
+impl Handler for NeovimHandler {
+  type Writer = Compat<Stdout>;
+
+  async fn handle_request(
+    &self,
+    name: String,
+    _args: Vec<Value>,
+    neovim: Neovim<Compat<Stdout>>,
+  ) -> Result<Value, Value> {
+    match name.as_ref() {
+      "init_content_window" => {
+          neovim.command("echom 'some win value=..'").await.unwrap();
+          // neovim.command(&format!("echom 'some win value={:?}'", win)).unwrap();
+        // let c = neovim.get_current_buf().await.unwrap();
+        // for _ in 0..1_000_usize {
+        //   let _x = c.get_lines(0, -1, false).await;
+        // }
+        Ok(Value::Nil)
+      },
+      // "buffer" => {
+      //   for _ in 0..10_000_usize {
+      //     let _ = neovim.get_current_buf().await.unwrap();
+      //   }
+      //   Ok(Value::Nil)
+      // },
+      // "api" => {
+      //   for _ in 0..1_000_usize {
+      //     let _ = neovim.get_api_info().await.unwrap();
+      //   }
+      //   Ok(Value::Nil)
+      // },
+      _ => Ok(Value::Nil)
+    }
+  }
+}
+
+
+// use neovim_lib::{Neovim, NeovimApi, Session, Value, Handler, RequestHandler};
+// use neovim_lib::neovim_api::{Window};
+// use crate::messages::Messages;
+
 
 struct MyHandler {
     event_handler: &'static EventHandler
