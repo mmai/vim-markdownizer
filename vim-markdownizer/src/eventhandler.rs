@@ -19,11 +19,15 @@ pub struct EventHandler {
     markdownizer: Markdownizer,
 }
 
-struct MyHandler();
+struct MyHandler {
+    event_handler: &'static EventHandler
+}
+
 impl Handler for MyHandler {}
 impl RequestHandler for MyHandler {
     fn handle_request(&mut self, _name: &str, _args: Vec<Value>) -> Result<Value, Value> {
-        Ok(Value::from("ok"))
+        self.event_handler.nvim.command(&format!("echom 'in handle_request'")).unwrap();
+        Ok(Value::from(true))
     }
 }
 
@@ -39,7 +43,8 @@ impl EventHandler {
 
     // Handle events
     pub fn recv(&mut self) {
-        let receiver = self.nvim.session.start_event_loop_channel_handler(MyHandler());
+        let my_handler = MyHandler { event_handler: self };
+        let receiver = self.nvim.session.start_event_loop_channel_handler(my_handler);
 
         for (event, mut values) in receiver {
             match Messages::from(event) {
