@@ -54,6 +54,13 @@
 
 ## Vrac
 
+
+* tester emacs org-mode / org-roam
+  - https://github.com/hlissner/doom-emacs
+  - https://org-roam.readthedocs.io/en/master/
+
+* gestion avancement projet avec https://github.com/rlue/vim-getting-things-down
+* +tagscommuns => associer emojis 👜 
 * order by status / importance
 * [ ] Dashboard
   * [ ] Quadrant
