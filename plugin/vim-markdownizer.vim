@@ -16,7 +16,7 @@ endif
 
 " Commands
 function! s:dashboard()
-  call rpcrequest(s:markdownizerJobId, s:InitContentWindow)
+  let res = call rpcrequest(s:markdownizerJobId, s:InitContentWindow)
   let refs = MarkdownizerOpen()
   let s:buf_dashboard = refs["dashboard"]
   let s:content_win = refs["content"]
