@@ -1,6 +1,7 @@
 # Dev doc
 
 [Backlog](backlog.md)
+[Dev installation](Dev-installation.md)
 
 ## Specs
 
