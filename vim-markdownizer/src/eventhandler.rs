@@ -7,7 +7,7 @@ use markdownizer::{types, Markdownizer};
 use std::path::PathBuf;
 
 use nvim_rs::{
-  compat::tokio::Compat, Handler, Neovim,
+  compat::tokio::Compat, Handler, Neovim, Window
 };
 
 
@@ -16,7 +16,7 @@ type StoredProject = types::Stored<types::Project>;
 #[derive(Clone)]
 pub struct State {
     loaded: bool,
-    content_win: Option<Window>,
+    // content_win: Option<Window>,
     projects: Vec<StoredProject>
 }
 
@@ -24,6 +24,15 @@ pub struct State {
 pub struct NeovimHandler{
     state: State,
     markdownizer: Markdownizer,
+}
+
+impl NeovimHandler {
+    pub fn new(projects_dir: &str) -> Self {
+        NeovimHandler {
+            state: State { loaded: false, projects: vec![] },
+            markdownizer: Markdownizer::new(&projects_dir.into())
+        }
+    }
 }
 
 #[async_trait]
@@ -68,7 +77,7 @@ impl Handler for NeovimHandler {
 // use neovim_lib::neovim_api::{Window};
 // use crate::messages::Messages;
 
-
+/*
 struct MyHandler {
     event_handler: &'static EventHandler
 }
@@ -210,3 +219,4 @@ impl EventHandler {
         buf.set_lines(&mut self.nvim, row, row, true, plist_str).unwrap();
     }
 }
+*/

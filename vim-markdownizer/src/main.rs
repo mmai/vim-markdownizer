@@ -17,7 +17,7 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     let projects_dir = &args[1]; // projects files directory
 
-    let handler: eventhandler::NeovimHandler = eventhandler::NeovimHandler{};
+    let handler: eventhandler::NeovimHandler = eventhandler::NeovimHandler::new(projects_dir);
     let (nvim, io_handler) = create::new_parent(handler).await;
 
     // Any error should probably be logged, as stderr is not visible to users.
