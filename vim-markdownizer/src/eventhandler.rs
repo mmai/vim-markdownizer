@@ -1,6 +1,8 @@
 use async_trait::async_trait;
 use tokio::io::Stdout;
 use rmpv::Value;
+use std::{error::Error, sync::Arc};
+use futures::lock::Mutex;
 
 use pathdiff::diff_paths;
 use markdownizer::{types, Markdownizer};
@@ -13,25 +15,35 @@ use nvim_rs::{
 
 type StoredProject = types::Stored<types::Project>;
 
-#[derive(Clone)]
+// #[derive(Clone)]
 pub struct State {
     loaded: bool,
-    content_win: Option<Value>,
-    // content_win: Option<Window<Compat<Stdout>>>,
+    // content_win: Option<Value>,
+    content_win: Option<Window<Compat<Stdout>>>,
     projects: Vec<StoredProject>
+}
+
+impl Default for State {
+    fn default() -> Self {
+        State {
+            loaded: false,
+            projects: vec![],
+            content_win: None
+        }
+    }
 }
 
 #[derive(Clone)]
 pub struct NeovimHandler{
-    state: State,
+    state: Arc<Mutex<State>>,
     markdownizer: Markdownizer,
 }
 
 impl NeovimHandler {
-    pub fn new(projects_dir: &str) -> Self {
+    pub fn new(projects_dir: &str, state: Arc<Mutex<State>>) -> Self {
         NeovimHandler {
             // state: State { loaded: false, projects: vec![] },
-            state: State { loaded: false, content_win: None, projects: vec![] },
+            state,
             markdownizer: Markdownizer::new(&projects_dir.into())
         }
     }
@@ -52,9 +64,11 @@ impl NeovimHandler {
         })
     }
 
-    fn init_state(&mut self) {
+    async fn init_state(&self) {
         let result = self.markdownizer.project_list();
-        self.state.projects = result.unwrap_or(vec!());
+
+        let mut state = &mut *(self.state).lock().await;
+        state.projects = result.unwrap_or(vec!());
     }
 
     // Call a vim function which return output
@@ -109,10 +123,11 @@ impl Handler for NeovimHandler {
           "dashboard" => {
               // let buf = values.pop().unwrap().into();
               let buf = nvim.get_current_buf().await.unwrap();
-              if (! &self.state.loaded){
-                  &self.init_state();
+              let state = (self.state).lock().await;
+              if (! &state.loaded){
+                  self.init_state().await;
               }
-              let plist = self.state.projects.iter().map(|p| String::from(&p.entity.title)).collect();
+              let plist = state.projects.iter().map(|p| String::from(&p.entity.title)).collect();
               buf.set_lines(0, -1, true, plist).await.unwrap();
           },
           "project_list" => {
@@ -131,7 +146,8 @@ impl Handler for NeovimHandler {
               let win_id = _args.pop().unwrap();
 
               let curr_dir: PathBuf = self.vim_ask(&nvim, "expand('%:p:h')").await.unwrap().into();
-              let stored_project:&StoredProject = &self.state.projects[line as usize - 1];
+              let state = (self.state).lock().await;
+              let stored_project:&StoredProject = &state.projects[line as usize - 1];
               // let stored_project:&StoredProject = self.state.projects.get(line.into()).unwrap();
               let project = &stored_project.entity;
               let location = &stored_project.location;
