@@ -121,6 +121,7 @@ impl Handler for NeovimHandler {
               // }).collect();
           }
           "dashboard" => {
+              // nvim.command(&format!("echom 'in dashboard rs'")).await.unwrap();
               // let buf = values.pop().unwrap().into();
               let buf = nvim.get_current_buf().await.unwrap();
               let state = (self.state).lock().await;
