@@ -23,6 +23,14 @@ pub struct State {
     projects: Vec<StoredProject>
 }
 
+impl State {
+    async fn init(&mut self, mark: &Markdownizer) {
+        let result = mark.project_list();
+        self.projects = result.unwrap_or(vec!());
+        self.loaded = true;
+    }
+}
+
 impl Default for State {
     fn default() -> Self {
         State {
@@ -42,7 +50,6 @@ pub struct NeovimHandler{
 impl NeovimHandler {
     pub fn new(projects_dir: &str, state: Arc<Mutex<State>>) -> Self {
         NeovimHandler {
-            // state: State { loaded: false, projects: vec![] },
             state,
             markdownizer: Markdownizer::new(&projects_dir.into())
         }
@@ -66,7 +73,6 @@ impl NeovimHandler {
 
     async fn init_state(&self) {
         let result = self.markdownizer.project_list();
-
         let mut state = &mut *(self.state).lock().await;
         state.projects = result.unwrap_or(vec!());
     }
@@ -85,20 +91,21 @@ impl Handler for NeovimHandler {
   type Writer = Compat<Stdout>;
 
   // responds to 'rpcrequest' calls from nvim plugin
-  async fn handle_request(
-    &self,
-    name: String,
-    _args: Vec<Value>,
-    neovim: Neovim<Compat<Stdout>>,
-  ) -> Result<Value, Value> {
-    match name.as_ref() {
-      "init_content_window" => {
-          neovim.command("echom 'init_content_window ..'").await.unwrap();
-        Ok(Value::Nil)
-      },
-      _ => Ok(Value::Nil)
-    }
-  }
+  // not stable for rust
+  // async fn handle_request(
+  //   &self,
+  //   name: String,
+  //   _args: Vec<Value>,
+  //   neovim: Neovim<Compat<Stdout>>,
+  // ) -> Result<Value, Value> {
+  //   match name.as_ref() {
+  //     "init_content_window" => {
+  //         neovim.command("echom 'init_content_window ..'").await.unwrap();
+  //       Ok(Value::Nil)
+  //     },
+  //     _ => Ok(Value::Nil)
+  //   }
+  // }
 
 
   // responds to 'rpcnotify' calls from nvim plugin
@@ -109,27 +116,17 @@ impl Handler for NeovimHandler {
       nvim: Neovim<Compat<Stdout>>,
   ) {
       match name.as_ref() {
-          "init_content_window" => {
-              let content_win = nvim.get_current_win().await.unwrap();
-              // self.state.content_win = Some(*content_win);
-              nvim.command(&format!("echom 'initwin value={:?}'", content_win.get_value())).await.unwrap();
-
-              // let wins = nvim.list_wins().await.unwrap();
-              // let _:() = wins.iter().map(|win| {
-                  // nvim.command(&format!("echom 'some win value={:?}'", win)).unwrap();
-                  // ()
-              // }).collect();
-          }
           "dashboard" => {
               // nvim.command(&format!("echom 'in dashboard rs'")).await.unwrap();
               // let buf = values.pop().unwrap().into();
               let buf = nvim.get_current_buf().await.unwrap();
-              let state = (self.state).lock().await;
+              let mut state = (self.state).lock().await;
               if (! &state.loaded){
-                  self.init_state().await;
+                  state.init(&self.markdownizer).await;
               }
               let plist = state.projects.iter().map(|p| String::from(&p.entity.title)).collect();
               buf.set_lines(0, -1, true, plist).await.unwrap();
+              // nvim.out_write("ddashboard end\n").await.unwrap();
           },
           "project_list" => {
               let result = self.get_project_list(&nvim).await;

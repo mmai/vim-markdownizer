@@ -2,8 +2,13 @@
 
 ## Next tasks
 
+* foreach project : get status
+  * get title, status
+  * get next action
+  * calculate theorical completion
+  * detect projects with missing information
+
 - create window from id (look at vim-api internal methods)
-- rx rust ? tokio ? other libs (see webassembly...) ?
 
 ## Plugin vim -----------
 
