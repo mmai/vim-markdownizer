@@ -26,7 +26,7 @@ endfunction
 
 " Opens dashboard window
 function! s:open()
-    " get content buffer (current buffer before opening dashboard)
+    " get content window (current window before opening dashboard)
 	let s:win_content = winnr()
 
 	let s:winrestcmd = winrestcmd() " get the command to restore window sizes

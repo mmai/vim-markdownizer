@@ -29,6 +29,7 @@ function! ProjectSelect()
     let pos = getcurpos() " returns [bufnum,line,col,off,curswant]
     let line = pos[1]
     call rpcnotify(s:markdownizerJobId, s:ProjectSelect, s:content_win, line)
+    call MarkdownizerClose()
 endfunction
 
 function! s:project_list()

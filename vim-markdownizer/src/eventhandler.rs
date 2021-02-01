@@ -124,7 +124,10 @@ impl Handler for NeovimHandler {
               if (! &state.loaded){
                   state.init(&self.markdownizer).await;
               }
-              let plist = state.projects.iter().map(|p| String::from(&p.entity.title)).collect();
+              let plist = state.projects.iter().map(|p| {
+                  let proj = &p.entity;
+                  format!("{} ({})", proj.title, proj.tasks.len())
+              }).collect();
               buf.set_lines(0, -1, true, plist).await.unwrap();
               // nvim.out_write("ddashboard end\n").await.unwrap();
           },
@@ -143,23 +146,16 @@ impl Handler for NeovimHandler {
               let line = _args.pop().unwrap().as_i64().unwrap();
               let win_id = _args.pop().unwrap();
 
-              let curr_dir: PathBuf = self.vim_ask(&nvim, "expand('%:p:h')").await.unwrap().into();
+              // Go to initial window
+              nvim.command(&format!("exe {} . \"wincmd w\"", win_id)).await.unwrap();
+
+              // Open project page
+              // let curr_dir: PathBuf = self.vim_ask(&nvim, "expand('%:p:h')").await.unwrap().into();
               let state = (self.state).lock().await;
               let stored_project:&StoredProject = &state.projects[line as usize - 1];
-              // let stored_project:&StoredProject = self.state.projects.get(line.into()).unwrap();
-              let project = &stored_project.entity;
               let location = &stored_project.location;
-              let relative_path = diff_paths(location.as_path(), &curr_dir).unwrap();
-              let file_path = String::from(format!("{}", relative_path.to_str().unwrap()));
-
-              // let cwin = Window {
-              //     code_data: self.state.content_win.clone().unwrap(),
-              //     neovim: nvim,
-              // };
-              // nvim.set_current_win(&cwin).await.unwrap();
-              // self.nvim.command(&format!("echo '{}'", file_path)).unwrap();
+              let file_path = String::from(format!("{}", location.to_str().unwrap()));
               nvim.command(&format!("e {}", file_path)).await.unwrap();
-              // self.nvim.err_writeln(&format!("{}", file_path)).unwrap();
           }
           _ => {}
 
