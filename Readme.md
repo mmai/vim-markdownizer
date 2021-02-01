@@ -26,3 +26,11 @@ The installation script will try to download the prebuilt binaries if they exist
 platform. If not, it will try to compile the rust sources, in this case you will
 need to have [Cargo](https://www.rust-lang.org/tools/install) available on your system.
 
+## Usage
+
+* Open dashboard `:MarkdownizerDashboard`
+* Close dashboard `q`
+
+In a markdown file
+* init a new project : `:MarkdownizerInitProject`
+* insert list of projects : `:MarkdownizerProjectList`

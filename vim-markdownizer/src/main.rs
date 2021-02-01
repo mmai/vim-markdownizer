@@ -1,15 +1,9 @@
 use std::env;
 
 mod eventhandler;
-// mod messages;
-//
-// fn main() {
-//     let args: Vec<String> = env::args().collect();
-//     let projects_dir = &args[1]; // projects files directory
-//     let mut nvim = eventhandler::EventHandler::new(projects_dir);
-//     nvim.recv();
-// }
-use std::error::Error;
+
+use std::{error::Error, sync::Arc};
+use futures::lock::Mutex;
 use nvim_rs::create::tokio as create;
 
 #[tokio::main]
@@ -17,7 +11,9 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     let projects_dir = &args[1]; // projects files directory
 
-    let handler: eventhandler::NeovimHandler = eventhandler::NeovimHandler::new(projects_dir);
+    let state = Arc::new(Mutex::new(eventhandler::State::default()));
+
+    let handler: eventhandler::NeovimHandler = eventhandler::NeovimHandler::new(projects_dir, state);
     let (nvim, io_handler) = create::new_parent(handler).await;
 
     // Any error should probably be logged, as stderr is not visible to users.

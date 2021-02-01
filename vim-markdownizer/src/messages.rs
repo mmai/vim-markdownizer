@@ -9,7 +9,6 @@ pub enum Messages {
 impl From<String> for Messages {
     fn from(event: String) -> Self {
         match &event[..] {
-            "init_content_window" => Messages::InitContentWindow,
             "project_list" => Messages::ProjectList,
             "project_select" => Messages::ProjectSelect,
             "dashboard" => Messages::Dashboard,

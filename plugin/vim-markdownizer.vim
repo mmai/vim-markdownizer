@@ -4,7 +4,6 @@ let s:bin = s:plugindir.'/target/release/vim-markdownizer'
 let s:projectsdir = '/home/henri/think/todo/projets/'
 
 " Constants for RPC messages.
-let s:InitContentWindow = 'init_content_window'
 let s:ProjectList = 'project_list'
 let s:ProjectSelect = 'project_select'
 let s:Dashboard = 'dashboard'
@@ -16,7 +15,6 @@ endif
 
 " Commands
 function! s:dashboard()
-  call rpcrequest(s:markdownizerJobId, s:InitContentWindow)
   let refs = MarkdownizerOpen()
   let s:buf_dashboard = refs["dashboard"]
   let s:content_win = refs["content"]
@@ -24,12 +22,14 @@ function! s:dashboard()
   call rpcnotify(s:markdownizerJobId, s:Dashboard, s:buf_dashboard)
   
   nnoremap <script> <silent> <buffer> <CR> :call ProjectSelect()<cr>
+  nnoremap <script> <silent> <buffer> q :call MarkdownizerClose()<cr>
 endfunction
 
 function! ProjectSelect()
     let pos = getcurpos() " returns [bufnum,line,col,off,curswant]
     let line = pos[1]
     call rpcnotify(s:markdownizerJobId, s:ProjectSelect, s:content_win, line)
+    call MarkdownizerClose()
 endfunction
 
 function! s:project_list()
@@ -67,31 +67,8 @@ endfunction
 
 call s:connect()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if !exists('*DashboardInitProject')
-function! DashboardInitProject()
+if !exists('*MarkdowniserInitProject')
+function! MarkdownizerInitProject()
     set paste
     let template = "
         \ ---\n
@@ -130,21 +107,8 @@ endif
 " endsnippet
 
 
-if !exists('*DashboardShowProjects')
-function! DashboardShowProjects()
-    execute ':read !'.s:bin.' -d '.s:projectsdir.' -r '.s:projectsdir
-endfunction
-endif
-
-
-command! -buffer DashboardShowProjects call DashboardShowProjects()
-nnoremap <buffer> <script> <Plug>DashboardShowProjects :DashboardShowProjects<CR>
-if !hasmapto('<Plug>DashboardShowProjects')
-  nmap <buffer> <silent> <Leader>dp <Plug>DashboardShowProjects
-endif
-
-command! -buffer DashboardInitProject call DashboardInitProject()
-nnoremap <buffer> <script> <Plug>DashboardInitProject :DashboardInitProject<CR>
-if !hasmapto('<Plug>DashboardInitProject')
-  nmap <buffer> <silent> <Leader>db <Plug>DashboardInitProject
+command! -buffer MarkdownizerInitProject call DashboardInitProject()
+nnoremap <buffer> <script> <Plug>MarkdownizerInitProject :MarkdownizerInitProject<CR>
+if !hasmapto('<Plug>MarkdownizerInitProject')
+  nmap <buffer> <silent> <Leader>db <Plug>MarkdownizerInitProject
 endif
