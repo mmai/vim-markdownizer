@@ -2,6 +2,7 @@
 
 ## Next tasks
 
+* bug : dashboard toogle ne préserve pas le contenu
 * foreach project : get status
   * get title, status
   * get next action

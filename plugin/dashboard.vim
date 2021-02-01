@@ -29,7 +29,7 @@ function! s:open()
     " get content buffer (current buffer before opening dashboard)
 	let s:win_content = winnr()
 
-	let s:winrestcmd = winrestcmd()
+	let s:winrestcmd = winrestcmd() " get the command to restore window sizes
 	execute get(g:, 'dashboard_window', s:default_window)
 	let s:buf_dashboard = bufnr('')
 	setlocal nonumber buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
@@ -51,11 +51,12 @@ function! s:getpos()
 	return {'tab': tabpagenr(), 'buf': bufnr(''), 'win': winnr(), 'cnt': winnr('$')}
 endfunction
 
+" called from vim-markdownizer.vim > dashboard()
 function! MarkdownizerOpen()
     call s:open()
     return { "dashboard": s:buf_dashboard, "content": s:win_content }
 endfunction
 
-" command! MarkdownizerOpen :call s:open()
-command! MarkdownizerClose :call s:close()
-command! MarkdownizerToggle :call s:toggle()
+function! MarkdownizerClose()
+    call s:close()
+endfunction
