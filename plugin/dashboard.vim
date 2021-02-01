@@ -34,6 +34,7 @@ function! s:open()
 	let s:buf_dashboard = bufnr('')
 	setlocal nonumber buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
 		\ modifiable statusline=>\ Main-menu nocursorline nofoldenable
+		\ cursorline
 	if exists('&relativenumber')
 		setlocal norelativenumber
 	endif
